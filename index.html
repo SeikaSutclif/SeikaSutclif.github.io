@@ -1,0 +1,45 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Deberías Estar Aquí</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "howler": "https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="container">
+        <div id="intro-screen">
+            <h1 id="title">NO CONTINÚES</h1>
+            <p>Esta experiencia puede ser perturbadora. ¿Estás seguro de que quieres continuar?</p>
+            <button id="start-btn">Entiendo los riesgos</button>
+        </div>
+
+        <div id="main-content" class="hidden">
+            <div id="messages"></div>
+            <div id="glitch-overlay"></div>
+            <div id="visual-elements">
+                <div id="eye"></div>
+                <div id="static-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cursor-follower">Te veo</div>
+    <div id="camera-permission" class="hidden">
+        <p>Permite el acceso para continuar...</p>
+        <button id="camera-btn">Conceder Acceso</button>
+    </div>
+    <video id="webcam" class="hidden"></video>
+    <canvas id="snapshot" class="hidden"></canvas>
+
+    <script type="module" src="config.js"></script>
+    <script type="module" src="images.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>

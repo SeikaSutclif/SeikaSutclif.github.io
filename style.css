@@ -1,0 +1,420 @@
+@import url('https://fonts.googleapis.com/css2?family=Creepster&family=Special+Elite&display=swap');
+
+:root {
+    --main-bg: #000;
+    --text-color: #b30000;
+    --glitch-color-1: rgba(255, 0, 0, 0.2);
+    --glitch-color-2: rgba(0, 255, 255, 0.2);
+    --vhs-lines: rgba(255, 255, 255, 0.03);
+    --scan-line-color: rgba(255, 255, 255, 0.07);
+    --vhs-red-shadow: rgba(255, 0, 0, 0.3);
+    --vhs-blue-shadow: rgba(0, 255, 255, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: none;
+}
+
+body {
+    background-color: var(--main-bg);
+    color: var(--text-color);
+    font-family: 'Special Elite', cursive;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    transition: background-color 5s;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        var(--scan-line-color) 0px,
+        var(--scan-line-color) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 15;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg, 
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0.1) 50%,
+        rgba(0,0,0,0) 100%
+    );
+    animation: tracking-noise 8s infinite;
+    pointer-events: none;
+    z-index: 14;
+}
+
+#container {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+/* Intro screen */
+#intro-screen {
+    text-align: center;
+    padding: 20px;
+    max-width: 600px;
+}
+
+#title {
+    font-family: 'Creepster', cursive;
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    animation: pulse 2s infinite, tracking-error 10s infinite;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(179, 0, 0, 0.7);
+    position: relative;
+}
+
+#title::before {
+    content: "NO CONTINÚES";
+    position: absolute;
+    left: 2px;
+    top: 0;
+    color: cyan;
+    opacity: 0.4;
+    animation: title-shift 2.5s infinite;
+    z-index: -1;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0.8; transform: scale(1); }
+}
+
+@keyframes title-shift {
+    0%, 100% { transform: translate(-3px, 0); opacity: 0.4; }
+    25% { transform: translate(3px, 2px); opacity: 0.5; }
+    75% { transform: translate(-2px, -2px); opacity: 0.3; }
+}
+
+#start-btn, #camera-btn {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: #111;
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    font-family: 'Special Elite', cursive;
+    font-size: 1rem;
+    cursor: none;
+    transition: all 0.3s;
+}
+
+#start-btn:hover, #camera-btn:hover {
+    background-color: var(--text-color);
+    color: #000;
+    transform: scale(1.05);
+}
+
+/* Main content */
+#main-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#messages {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    font-size: 2rem;
+    text-align: center;
+    width: 90%;
+    max-width: 800px;
+}
+
+.message {
+    opacity: 0;
+    transition: opacity 0.5s;
+    margin-bottom: 1rem;
+    position: relative;
+    text-shadow: 2px 0 0 var(--vhs-red-shadow), -2px 0 0 var(--vhs-blue-shadow);
+}
+
+.message.analog-distortion {
+    animation: analog-shift 0.8s infinite alternate-reverse;
+}
+
+@keyframes analog-shift {
+    0% { transform: translateY(0); }
+    25% { transform: translateY(-2px); }
+    75% { transform: translateY(2px); }
+    100% { transform: translateY(0); }
+}
+
+.message.visible {
+    opacity: 1;
+}
+
+/* Cursor follower */
+#cursor-follower {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    font-size: 0.8rem;
+    color: rgba(255, 0, 0, 0.7);
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+    transition: opacity 0.3s;
+    opacity: 0;
+    z-index: 1000;
+    font-family: 'Special Elite', cursive;
+}
+
+/* Visual effects */
+#eye {
+    position: absolute;
+    width: 80px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    border: 1px solid black;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+#eye::after {
+    content: "";
+    width: 30px;
+    height: 30px;
+    background-color: black;
+    border-radius: 50%;
+}
+
+#glitch-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    mix-blend-mode: screen;
+    opacity: 0;
+}
+
+#static-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 4;
+}
+
+/* Camera permission */
+#camera-permission {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+#webcam, #snapshot {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.glitch {
+    animation: glitch 0.3s linear;
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+        text-shadow: 0 0 0 var(--glitch-color-1);
+    }
+    25% {
+        transform: translate(-5px, 5px);
+        text-shadow: -3px 0 0 var(--glitch-color-1), 3px 0 0 var(--glitch-color-2);
+    }
+    50% {
+        transform: translate(5px, -5px);
+        text-shadow: 3px 0 0 var(--glitch-color-1), -3px 0 0 var(--glitch-color-2);
+    }
+    75% {
+        transform: translate(-5px, -5px);
+        text-shadow: -3px 0 0 var(--glitch-color-1), 3px 0 0 var(--glitch-color-2);
+    }
+    100% {
+        transform: translate(0);
+        text-shadow: 0 0 0 var(--glitch-color-1);
+    }
+}
+
+#scary-door {
+    pointer-events: none;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8) inset, 0 0 30px var(--vhs-red-shadow);
+}
+
+/* VHS Enhanced Effects */
+.tracking-lines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        180deg,
+        transparent 0px,
+        transparent 3px,
+        rgba(255, 255, 255, 0.05) 3px,
+        rgba(255, 255, 255, 0.05) 4px
+    );
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.color-distortion {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at 50% 50%,
+        transparent 95%,
+        var(--vhs-red-shadow) 100%
+    );
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.head-contamination {
+    position: fixed;
+    top: 30%;
+    left: 0;
+    width: 100%;
+    height: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 20%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.1) 80%,
+        transparent 100%
+    );
+    opacity: 0;
+    pointer-events: none;
+    z-index: 6;
+}
+
+.vhs-effect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    mix-blend-mode: screen;
+}
+
+.tv-switch {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+    transition: opacity 0.1s;
+}
+
+.color-aberration {
+    text-shadow: 2px 0 0 rgba(255,0,0,0.5), -2px 0 0 rgba(0,255,255,0.5) !important;
+}
+
+.time-code {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    z-index: 100;
+    text-shadow: 1px 1px 0 black;
+    opacity: 0.8;
+}
+
+.timestamp {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    z-index: 100;
+    text-shadow: 1px 1px 0 black;
+    opacity: 0.8;
+}
+
+@keyframes tracking-noise {
+    0% { transform: translateX(0); }
+    10% { transform: translateX(-5px); }
+    20% { transform: translateX(5px); }
+    30% { transform: translateX(0); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes tracking-error {
+    0%, 100% { transform: skewX(0deg); }
+    88%, 90% { transform: skewX(20deg); }
+    92% { transform: skewX(-15deg); }
+    94% { transform: skewX(0deg); }
+}
