@@ -139,8 +139,8 @@ function updateTimeCode() {
 
 // Update VHS timestamp
 function updateTimestamp() {
-    const randomYear = 1980 + Math.floor(Math.random() * 20);
-    const oldDate = new Date(randomYear, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
+    // Replace random date with current date
+    const currentDate = new Date();
     
     const options = { 
         year: 'numeric', 
@@ -152,7 +152,7 @@ function updateTimestamp() {
         hour12: false
     };
     
-    timestamp.textContent = oldDate.toLocaleDateString('es-ES', options).replace(/\//g, '-');
+    timestamp.textContent = currentDate.toLocaleDateString('es-ES', options).replace(/\//g, '-');
 }
 
 // Simulate VHS head contamination
