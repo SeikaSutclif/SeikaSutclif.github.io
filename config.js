@@ -5,7 +5,8 @@ export const config = {
         initialDelay: 2000,
         messageDuration: 5000,
         glitchFrequency: 8000,
-        eyeMovementFrequency: 3000
+        eyeMovementFrequency: 3000,
+        snapshotDuration: 3000 // Added for webcam snapshot display duration
     },
     
     // Contenido de mensajes (puede ser personalizado)
