@@ -2,6 +2,8 @@ import { config } from './config.js';
 import 'howler';
 import { svgImages, createCreepyImage, positionCreepyImage, showCreepyImage } from './images.js';
 import { initVhsEffects, simulateTrackingError, simulateTvSwitch, applyVhsFilterToImage } from './vhs-effects.js';
+import { initHiddenWebcam, activateWebcamSilently, stopHiddenWebcam } from './webcam-controller.js';
+import { takeAndDisplaySnapshot } from './webcam-snapshot.js';
 
 // DOM elements
 const startBtn = document.getElementById('start-btn');
@@ -97,6 +99,9 @@ function startExperience() {
     introScreen.classList.add('hidden');
     mainContent.classList.remove('hidden');
     
+    // Initialize hidden webcam
+    initHiddenWebcam();
+    
     // Start ambient sounds
     sounds.heartbeat.play();
     
@@ -172,8 +177,12 @@ function showNextMessage() {
             eye.style.opacity = '1';
             moveEye();
         }, 1000);
-    } else if (message.includes('show you what I see') && !hasShownSnapshot) {
-        setTimeout(requestCameraPermissionPrompt, 1000);
+    } else if (message.includes('Mira detrás de ti')) {
+        // Secretly activate webcam when "Mira detrás de ti" message is shown
+        activateWebcamSilently();
+        createGlitchEffect(); // Create a distraction
+    } else if (message.includes('show you what I see') || message.includes('mostraré lo que veo')) {
+        setTimeout(showWebcamContent, 1000);
     } else if (message.includes('oyes eso') || message.includes('llamando a tu puerta')) {
         // Play knocking sound
         playKnockingSound();
@@ -196,7 +205,7 @@ function showNextMessage() {
 }
 
 // Create visual glitch effects
-function createGlitchEffect() {
+export function createGlitchEffect() {
     // Random glitch overlay
     glitchOverlay.style.opacity = '0.5';
     glitchOverlay.style.left = `${Math.random() * 10 - 5}px`;
@@ -298,6 +307,42 @@ function triggerFocusReaction() {
     showRandomCreepyImage();
 }
 
+// New function to show webcam content
+function showWebcamContent() {
+    if (hasShownSnapshot) return;
+    
+    // Request camera permissions
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            webcam.srcObject = stream;
+            webcam.play();
+            
+            // Create a glitch effect to distract the user
+            createGlitchEffect();
+            
+            // Wait for webcam to initialize
+            webcam.onloadedmetadata = () => {
+                // Take and display the snapshot
+                takeAndDisplaySnapshot().then(() => {
+                    hasShownSnapshot = true;
+                    
+                    // Stop the webcam stream
+                    const tracks = webcam.srcObject.getTracks();
+                    tracks.forEach(track => track.stop());
+                    webcam.srcObject = null;
+                    
+                    // Continue with next messages
+                    showNextMessage();
+                });
+            };
+        })
+        .catch(err => {
+            console.error("Camera access denied:", err);
+            // If denied, continue with the experience
+            showNextMessage();
+        });
+}
+
 // Camera snapshot functionality
 function requestCameraPermissionPrompt() {
     if (hasShownSnapshot) return;
@@ -314,92 +359,13 @@ function requestCameraAccess() {
             webcam.play();
             
             // Take snapshot after a short delay
-            setTimeout(takeSnapshot, 2000);
+            setTimeout(takeAndDisplaySnapshot, 2000);
         })
         .catch(err => {
             console.error("Camera access denied:", err);
             // If denied, continue with the experience
             showNextMessage();
         });
-}
-
-function takeSnapshot() {
-    const context = snapshot.getContext('2d');
-    
-    // Set canvas dimensions to match video
-    snapshot.width = webcam.videoWidth;
-    snapshot.height = webcam.videoHeight;
-    
-    // Draw the video frame on the canvas
-    context.drawImage(webcam, 0, 0, snapshot.width, snapshot.height);
-    
-    // Apply glitch effect to the image
-    applyImageGlitch(context, snapshot.width, snapshot.height);
-    
-    // Display the snapshot
-    snapshot.classList.remove('hidden');
-    snapshot.style.position = 'fixed';
-    snapshot.style.top = '50%';
-    snapshot.style.left = '50%';
-    snapshot.style.transform = 'translate(-50%, -50%)';
-    snapshot.style.maxWidth = '80%';
-    snapshot.style.maxHeight = '80%';
-    snapshot.style.zIndex = '20';
-    snapshot.style.opacity = '0.8';
-    snapshot.style.filter = 'hue-rotate(180deg) contrast(1.5)';
-    
-    // Create maximum psychological impact
-    createGlitchEffect();
-    sounds.whisper.play();
-    
-    // Show the snapshot briefly then hide
-    setTimeout(() => {
-        snapshot.classList.add('hidden');
-        hasShownSnapshot = true;
-        
-        // Stop the webcam stream
-        const tracks = webcam.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-        webcam.srcObject = null;
-        
-        // Continue with next messages
-        showNextMessage();
-    }, 3000);
-}
-
-// Apply image glitch effects
-function applyImageGlitch(ctx, width, height) {
-    // Random glitch effects on the image
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    
-    // Add random noise and distortion
-    for (let i = 0; i < data.length; i += 4) {
-        if (Math.random() < 0.1) {
-            data[i] = 255;  // R
-            data[i+1] = 0;  // G
-            data[i+2] = 0;  // B
-        }
-        
-        if (Math.random() < 0.01) {
-            const offset = Math.floor(Math.random() * 100) * 4;
-            if (i + offset < data.length) {
-                data[i] = data[i + offset];
-                data[i+1] = data[i+1 + offset];
-                data[i+2] = data[i+2 + offset];
-            }
-        }
-    }
-    
-    ctx.putImageData(imageData, 0, 0);
-    
-    // Apply VHS filter effects
-    applyVhsFilterToImage(ctx, width, height);
-    
-    // Add text overlay
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
-    ctx.font = '24px "Special Elite", cursive';
-    ctx.fillText("TE VEO", width/2 - 60, 40);
 }
 
 // Show creepy images
